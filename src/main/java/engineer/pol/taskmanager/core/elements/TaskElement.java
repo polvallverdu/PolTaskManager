@@ -8,6 +8,7 @@ public class TaskElement {
         WAIT,
         RUN,
         RUN_ASYNC,
+        RUN_TIMED,
         LOOP,
     }
 
@@ -17,5 +18,8 @@ public class TaskElement {
 
     public ElementType getType() {
         return type;
+    }
+
+    public void cancel() {
     }
 }

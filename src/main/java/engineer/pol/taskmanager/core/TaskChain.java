@@ -2,7 +2,9 @@ package engineer.pol.taskmanager.core;
 
 import engineer.pol.taskmanager.core.elements.FunctionElement;
 import engineer.pol.taskmanager.core.elements.TaskElement;
+import engineer.pol.taskmanager.core.elements.TimedFunctionElement;
 import engineer.pol.taskmanager.core.elements.WaitElement;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,12 +36,16 @@ public class TaskChain {
     }
 
 
-    public static TaskChain create() {
-        return new TaskChain();
+    public static TaskChain create(TaskManager manager) {
+        TaskChain chain = new TaskChain();
+        chain.setManager(manager);
+        return chain;
     }
 
     public static TaskChain copy(TaskChain taskChain) {
-        return new TaskChain(new ArrayList<>(taskChain.getElements()));
+        TaskChain clone = new TaskChain(new ArrayList<>(taskChain.getElements()));
+        clone.setManager(taskChain.manager);
+        return clone;
     }
 
     private TaskElement getCurrentElement() {
@@ -79,20 +85,24 @@ public class TaskChain {
     }
 
     protected void _cancel() {
+        this.getCurrentElement().cancel();
         nextAction = null;
         status = TaskStatus.FINISHED;
     }
 
     protected void tick() {
-        if (status != TaskStatus.RUNNING || nextAction == null) return;
+        if (status != TaskStatus.RUNNING || nextAction == null || this.manager == null) return;
         if (System.currentTimeMillis() < nextAction) return;
 
         TaskElement element = getCurrentElement();
-        this.execute(element);
-        this.nextElement();
+        if (this.execute(element)) {
+            this.nextElement();
+        }
     }
 
-    private void execute(TaskElement element) {
+    private boolean execute(TaskElement element) {
+        boolean next = true;
+
         switch (element.getType()) {
             case WAIT -> {
                 WaitElement waitElement = (WaitElement) element;
@@ -112,11 +122,29 @@ public class TaskChain {
                     nextAction = System.currentTimeMillis();
                 });
             }
+            case RUN_TIMED -> {
+                next = false;
+                TimedFunctionElement timedFunctionElement = (TimedFunctionElement) element;
+                if (!timedFunctionElement.isRunning()) {
+                    timedFunctionElement.start();
+                }
+
+                double v = timedFunctionElement.getValue();
+                if (v >= 1) next = true;
+
+                timedFunctionElement.getFunction().accept(context, v);
+            }
         }
+
+        return next;
     }
 
-    protected void setManager(TaskManager manager) {
+    protected TaskChain setManager(@Nullable TaskManager manager) {
+        if (this.manager != null) {
+            this.manager.unregister(this);
+        }
         this.manager = manager;
+        return this;
     }
 
     private void resetContext() {

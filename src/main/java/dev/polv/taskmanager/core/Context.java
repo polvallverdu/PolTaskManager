@@ -1,4 +1,4 @@
-package engineer.pol.taskmanager.core;
+package dev.polv.taskmanager.core;
 
 import java.util.concurrent.ConcurrentHashMap;
 

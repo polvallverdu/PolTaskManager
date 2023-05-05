@@ -1,6 +1,6 @@
-package engineer.pol.taskmanager.core.elements;
+package dev.polv.taskmanager.core.elements;
 
-import engineer.pol.taskmanager.core.Context;
+import dev.polv.taskmanager.core.Context;
 
 import java.util.function.Consumer;
 

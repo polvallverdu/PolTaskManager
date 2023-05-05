@@ -1,9 +1,9 @@
-package engineer.pol.taskmanager.core;
+package dev.polv.taskmanager.core;
 
-import engineer.pol.taskmanager.core.elements.FunctionElement;
-import engineer.pol.taskmanager.core.elements.TaskElement;
-import engineer.pol.taskmanager.core.elements.TimedFunctionElement;
-import engineer.pol.taskmanager.core.elements.WaitElement;
+import dev.polv.taskmanager.core.elements.WaitElement;
+import dev.polv.taskmanager.core.elements.FunctionElement;
+import dev.polv.taskmanager.core.elements.TaskElement;
+import dev.polv.taskmanager.core.elements.TimedFunctionElement;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;

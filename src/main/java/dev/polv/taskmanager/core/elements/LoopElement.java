@@ -1,6 +1,6 @@
-package engineer.pol.taskmanager.core.elements;
+package dev.polv.taskmanager.core.elements;
 
-import engineer.pol.taskmanager.core.TaskChain;
+import dev.polv.taskmanager.core.TaskChain;
 
 import java.util.concurrent.Callable;
 

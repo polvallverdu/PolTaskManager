@@ -8,7 +8,7 @@ plugins {
     application
 }
 
-group = "engineer.pol.taskmanager"
+group = "dev.polv.taskmanager"
 version = properties["version"].toString()
 
 repositories {
@@ -31,29 +31,6 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
-}
-
-publishing {
-    println(properties["polRegistryUsername"])
-    repositories {
-        maven {
-            name = "polRegistry"
-            url = uri("https://artifactory.wosher.co/artifactory/pol-public/")
-            credentials {
-                username = "${properties["polRegistryUsername"]}"
-                password = "${properties["polRegistryPassword"]}"
-            }
-        }
-    }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "engineer.pol.taskmanager"
-            artifactId = "PolTaskManager"
-            version = properties["version"].toString()
-
-            from(components["java"])
-        }
-    }
 }
 
 /*signing {

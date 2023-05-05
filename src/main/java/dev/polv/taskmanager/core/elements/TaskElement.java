@@ -1,4 +1,4 @@
-package engineer.pol.taskmanager.core.elements;
+package dev.polv.taskmanager.core.elements;
 
 public class TaskElement {
 

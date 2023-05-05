@@ -1,4 +1,4 @@
-package engineer.pol.taskmanager.utils;
+package dev.polv.taskmanager.utils;
 
 import java.time.Duration;
 

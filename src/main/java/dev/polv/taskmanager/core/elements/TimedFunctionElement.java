@@ -1,12 +1,10 @@
-package engineer.pol.taskmanager.core.elements;
+package dev.polv.taskmanager.core.elements;
 
-import engineer.pol.taskmanager.core.Context;
-import engineer.pol.taskmanager.core.TaskChain;
-import engineer.pol.taskmanager.utils.math.Easing;
+import dev.polv.taskmanager.core.Context;
+import dev.polv.taskmanager.utils.math.Easing;
 
 import java.time.Duration;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class TimedFunctionElement extends TaskElement {
     private BiConsumer<Context, Double> function;

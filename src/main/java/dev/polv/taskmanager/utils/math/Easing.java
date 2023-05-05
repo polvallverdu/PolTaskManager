@@ -1,4 +1,4 @@
-package engineer.pol.taskmanager.utils.math;
+package dev.polv.taskmanager.utils.math;
 
 import java.util.HashMap;
 import java.util.function.Function;

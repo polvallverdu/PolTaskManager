@@ -13,6 +13,7 @@ version = properties["version"].toString()
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     //maven("https://maven.fabricmc.net")
 }
 
@@ -31,6 +32,18 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "dev.polv.taskmanager"
+            artifactId = "PolTaskManager"
+            version = properties["version"].toString()
+
+            from(components["java"])
+        }
+    }
 }
 
 /*signing {

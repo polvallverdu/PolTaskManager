@@ -17,6 +17,7 @@ public class TaskChain {
 
     private Long nextAction = null;
     private int index = 0;
+    private boolean blocked = false;
 
     private TaskManager manager = null;
 
@@ -64,7 +65,7 @@ public class TaskChain {
         }
     }
 
-    protected void _start() {
+    protected void _start() throws IllegalStateException {
         if (manager == null) {
             throw new IllegalStateException("TaskChain is not registered to a TaskManager");
         }
@@ -74,7 +75,7 @@ public class TaskChain {
         tick();
     }
 
-    protected void _schedule(Duration time) {
+    protected void _schedule(Duration time) throws IllegalStateException {
         if (manager == null) {
             throw new IllegalStateException("TaskChain is not registered to a TaskManager");
         }
@@ -159,6 +160,10 @@ public class TaskChain {
         return status == TaskStatus.RUNNING;
     }
 
+    public boolean isBlocked() {
+        return blocked;
+    }
+
     public Long getNextAction() {
         return nextAction;
     }
@@ -167,18 +172,55 @@ public class TaskChain {
         return index;
     }
 
-    public TaskChain wait(Duration time) {
+    public TaskChain timeout(Duration time) {
+        if (this.blocked) {
+            throw new IllegalStateException("TaskChain is blocked");
+        }
+
         elements.add(new WaitElement(time));
         return this;
     }
 
+    public TaskChain timeout(long time) {
+        if (this.blocked) {
+            throw new IllegalStateException("TaskChain is blocked");
+        }
+
+        return timeout(Duration.ofMillis(time));
+    }
+
     public TaskChain run(Consumer<Context> function) {
+        if (this.blocked) {
+            throw new IllegalStateException("TaskChain is blocked");
+        }
+
         elements.add(new FunctionElement(function, false));
         return this;
     }
 
     public TaskChain runAsync(Consumer<Context> function) {
+        if (this.blocked) {
+            throw new IllegalStateException("TaskChain is blocked");
+        }
+
         elements.add(new FunctionElement(function, true));
         return this;
+    }
+
+    public void start() {
+        this._start();
+    }
+
+    public void schedule(Duration time) {
+        this._schedule(time);
+    }
+
+    public void schedule(long time) {
+        this.schedule(Duration.ofMillis(time));
+    }
+
+    public void repeat(Duration delay, Duration interval) {
+        this.run((ctx) -> this._schedule(interval));
+        this.schedule(delay);
     }
 }

@@ -14,12 +14,10 @@ version = properties["version"].toString()
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    //maven("https://maven.fabricmc.net")
 }
 
 dependencies {
     testImplementation(kotlin("test"))
-    //compileOnly("net.fabricmc.fabric-api:fabric-api:0.63.0+1.19.2")
 }
 
 tasks.test {
@@ -30,8 +28,9 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
-application {
-    mainClass.set("MainKt")
+tasks.register("sourcesJar", Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
 }
 
 publishing {
@@ -42,8 +41,20 @@ publishing {
             version = properties["version"].toString()
 
             from(components["java"])
+            artifact(tasks["sourcesJar"]) {
+                classifier = "sources"
+            }
         }
     }
+    repositories {
+        maven {
+            url = uri("https://jitpack.io")
+        }
+    }
+}
+
+tasks.named("publish") {
+    dependsOn("publishToMavenLocal")
 }
 
 /*signing {

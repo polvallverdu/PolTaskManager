@@ -93,7 +93,7 @@ public class TaskChain {
 
         TaskElement element = getCurrentElement();
         if (this.execute(element)) {
-            int predictNextElementIndex = index++;
+            int predictNextElementIndex = index+1;
 
             if (predictNextElementIndex >= elements.size()) {
                 _cancel();

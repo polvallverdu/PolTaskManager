@@ -9,7 +9,7 @@ public class TaskElement {
         RUN,
         RUN_ASYNC,
         RUN_TIMED,
-        LOOP,
+        RUN_ASYNC_AWAIT,
     }
 
     protected TaskElement(ElementType type) {

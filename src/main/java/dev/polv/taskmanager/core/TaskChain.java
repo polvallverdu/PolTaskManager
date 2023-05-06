@@ -27,6 +27,7 @@ public class TaskChain {
 
     private Context context;
     private final Lock tickLock = new ReentrantLock();
+    private final Lock awaitLock = new ReentrantLock();
 
     private TaskChain() {
         this(new ArrayList<>());
@@ -117,16 +118,24 @@ public class TaskChain {
             }
             case RUN -> {
                 FunctionElement functionElement = (FunctionElement) element;
-                functionElement.getFunction().accept(context);
+                functionElement.accept(context);
                 nextAction = System.currentTimeMillis();
             }
             case RUN_ASYNC -> {
                 FunctionElement functionElement = (FunctionElement) element;
-                manager.getExecutor().submit(() -> {
-                    nextAction = null;
-                    functionElement.getFunction().accept(context);
-                    nextAction = System.currentTimeMillis();
-                });
+                manager.getExecutor().submit(() -> functionElement.accept(context));
+                nextAction = System.currentTimeMillis();
+            }
+            case RUN_ASYNC_AWAIT -> {
+                FunctionElement functionElement = (FunctionElement) element;
+                next = false;
+
+                if (!functionElement.isRunning() && awaitLock.tryLock()) {
+                    manager.getExecutor().submit(() -> functionElement.accept(context));
+                } else if (!functionElement.isRunning()) {
+                    awaitLock.unlock();
+                    next = true;
+                }
             }
             case RUN_TIMED -> {
                 next = false;

@@ -18,17 +18,29 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks {
+    withType<Test> {
+        useJUnitPlatform()
+    }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
-}
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "11"
+    }
 
-tasks.register("sourcesJar", Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
+    register("sourcesJar", Jar::class) {
+        archiveClassifier.set("sources")
+        from(sourceSets.main.get().allSource)
+    }
+
+    javadoc {
+        if (JavaVersion.current().isJava9Compatible) {
+            (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+        }
+    }
+
+    named("publish") {
+        dependsOn("publishToMavenLocal")
+    }
 }
 
 publishing {
@@ -39,6 +51,8 @@ publishing {
             version = properties["version"].toString()
 
             from(components["java"])
+
+            // Publish sources
             artifact(tasks["sourcesJar"]) {
                 classifier = "sources"
             }
@@ -48,19 +62,5 @@ publishing {
         maven {
             url = uri("https://jitpack.io")
         }
-    }
-}
-
-tasks.named("publish") {
-    dependsOn("publishToMavenLocal")
-}
-
-/*signing {
-    sign(publishing.publications["maven"])
-}*/
-
-tasks.javadoc {
-    if (JavaVersion.current().isJava9Compatible) {
-        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
     }
 }

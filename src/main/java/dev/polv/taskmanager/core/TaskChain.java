@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class TaskChain {
@@ -24,6 +26,7 @@ public class TaskChain {
     private final List<TaskElement> elements;
 
     private Context context;
+    private final Lock tickLock = new ReentrantLock();
 
     private TaskChain() {
         this(new ArrayList<>());
@@ -72,7 +75,7 @@ public class TaskChain {
         index = 0;
         nextAction = System.currentTimeMillis();
         status = TaskStatus.RUNNING;
-        tick();
+        // tick();
     }
 
     protected void _schedule(Duration time) throws IllegalStateException {
@@ -82,7 +85,7 @@ public class TaskChain {
         index = 0;
         nextAction = System.currentTimeMillis() + time.toMillis();
         status = TaskStatus.RUNNING;
-        tick();
+        // tick();
     }
 
     protected void _cancel() {
@@ -92,6 +95,7 @@ public class TaskChain {
     }
 
     protected void tick() {
+        if (!tickLock.tryLock()) return;
         if (status != TaskStatus.RUNNING || nextAction == null || this.manager == null) return;
         if (System.currentTimeMillis() < nextAction) return;
 
@@ -99,6 +103,8 @@ public class TaskChain {
         if (this.execute(element)) {
             this.nextElement();
         }
+
+        tickLock.unlock();
     }
 
     private boolean execute(TaskElement element) {
@@ -113,7 +119,6 @@ public class TaskChain {
                 FunctionElement functionElement = (FunctionElement) element;
                 functionElement.getFunction().accept(context);
                 nextAction = System.currentTimeMillis();
-                tick();
             }
             case RUN_ASYNC -> {
                 FunctionElement functionElement = (FunctionElement) element;

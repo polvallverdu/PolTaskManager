@@ -40,7 +40,6 @@ public class TaskChain {
         this.resetContext();
     }
 
-
     public static TaskChain create(TaskManager manager) {
         TaskChain chain = new TaskChain();
         chain.setManager(manager);
@@ -187,6 +186,12 @@ public class TaskChain {
         return index;
     }
 
+    /**
+     * Will wait for a certain amount of time before executing next chain.
+     *
+     * @param time Time to wait
+     * @return Same {@link TaskChain}
+     */
     public TaskChain timeout(Duration time) {
         if (this.blocked) {
             throw new IllegalStateException("TaskChain is blocked");
@@ -196,14 +201,25 @@ public class TaskChain {
         return this;
     }
 
-    public TaskChain timeout(long time) {
+    /**
+     * Will wait for a certain amount of time before executing next chain.
+     * @param timeInMillis Time to wait in milliseconds
+     * @return Same {@link TaskChain}
+     */
+    public TaskChain timeout(long timeInMillis) {
         if (this.blocked) {
             throw new IllegalStateException("TaskChain is blocked");
         }
 
-        return timeout(Duration.ofMillis(time));
+        return timeout(Duration.ofMillis(timeInMillis));
     }
 
+    /**
+     * Runs a function synchronously. Will block current thread.
+     *
+     * @param function Function to run
+     * @return Same {@link TaskChain}
+     */
     public TaskChain run(Consumer<Context> function) {
         if (this.blocked) {
             throw new IllegalStateException("TaskChain is blocked");
@@ -213,6 +229,11 @@ public class TaskChain {
         return this;
     }
 
+    /**
+     * Runs a function asynchronously (won't wait for it to finish).
+     * @param function Function to run
+     * @return Same {@link TaskChain}
+     */
     public TaskChain runAsync(Consumer<Context> function) {
         if (this.blocked) {
             throw new IllegalStateException("TaskChain is blocked");
@@ -222,6 +243,12 @@ public class TaskChain {
         return this;
     }
 
+    /**
+     * Runs a function asynchronously and waits for it to finish before continuing
+     *
+     * @param function Function to run
+     * @return Same {@link TaskChain}
+     */
     public TaskChain runAsyncAwait(Consumer<Context> function) {
         if (this.blocked) {
             throw new IllegalStateException("TaskChain is blocked");
@@ -231,18 +258,43 @@ public class TaskChain {
         return this;
     }
 
+    /**
+     * Builds and runs the {@link TaskChain}.
+     * <br><br>
+     * * <b>This will lock the Chain. No more Chains can be attached.</b>
+     */
     public void start() {
         this._start();
     }
 
+    /**
+     * Builds and schedules the {@link TaskChain}.
+     * <br><br>
+     * * <b>This will lock the Chain. No more Chains can be attached.</b>
+     * @param time Time to wait before starting the Chain
+     */
     public void schedule(Duration time) {
         this._schedule(time);
     }
 
-    public void schedule(long time) {
-        this.schedule(Duration.ofMillis(time));
+    /**
+     * Builds and schedules the {@link TaskChain}.
+     * <br><br>
+     * * <b>This will lock the Chain. No more Chains can be attached.</b>
+     * @param timeInMillis Time to wait before starting the Chain in milliseconds
+     */
+    public void schedule(long timeInMillis) {
+        this.schedule(Duration.ofMillis(timeInMillis));
     }
 
+    /**
+     * Builds and schedules the {@link TaskChain} with repetition.
+     * It will run the delay first, and each time it finishes it will run the interval.
+     * <br><br>
+     * * <b>This will lock the Chain. No more Chains can be attached.</b>
+     * @param delay Delay before starting the Chain
+     * @param interval Interval between each repetition
+     */
     public void repeat(Duration delay, Duration interval) {
         this.timeout(interval);
         this.run(ctx -> {

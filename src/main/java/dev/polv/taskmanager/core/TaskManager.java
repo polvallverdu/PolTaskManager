@@ -3,16 +3,19 @@ package dev.polv.taskmanager.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class TaskManager {
 
+    private final String id;
     private final List<TaskChain> tasks;
     private final ExecutorService executor;
 
-    protected TaskManager() {
+    protected TaskManager(String id) {
+        this.id = id;
         this.tasks = new ArrayList<>();
         this.executor = Executors.newCachedThreadPool();
     }
@@ -33,8 +36,15 @@ public class TaskManager {
     /**
      * @return new {@link TaskManager} from this manager
      */
+    public static TaskManager create(String id) {
+        return new TaskManager(id);
+    }
+
+    /**
+     * @return new {@link TaskManager} from this manager
+     */
     public static TaskManager create() {
-        return new TaskManager();
+        return new TaskManager(UUID.randomUUID().toString());
     }
 
     /**

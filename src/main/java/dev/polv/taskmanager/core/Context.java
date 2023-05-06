@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Context {
 
     private final TaskChain chain;
-    private ConcurrentHashMap<String, Object> returnData;
+    private final ConcurrentHashMap<String, Object> returnData;
 
     protected Context(TaskChain chain) {
         this.chain = chain;
@@ -22,6 +22,10 @@ public class Context {
 
     public void putReturnData(String key, Object value) {
         this.returnData.put(key, value);
+    }
+
+    public boolean hasReturnData(String key) {
+        return this.returnData.containsKey(key);
     }
 
 }

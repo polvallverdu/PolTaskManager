@@ -60,14 +60,6 @@ public class TaskChain {
         return elements;
     }
 
-    private void nextElement() {
-        index++;
-        if (index >= elements.size()) {
-            _cancel();
-            index = 0;
-        }
-    }
-
     protected void _start() throws IllegalStateException {
         if (manager == null) {
             throw new IllegalStateException("TaskChain is not registered to a TaskManager");
@@ -101,7 +93,13 @@ public class TaskChain {
 
         TaskElement element = getCurrentElement();
         if (this.execute(element)) {
-            this.nextElement();
+            int predictNextElementIndex = index++;
+
+            if (predictNextElementIndex >= elements.size()) {
+                _cancel();
+            } else {
+                index = predictNextElementIndex;
+            }
         }
 
         tickLock.unlock();
@@ -298,7 +296,7 @@ public class TaskChain {
     public void repeat(Duration delay, Duration interval) {
         this.timeout(interval);
         this.run(ctx -> {
-            this.index = -1; // Apaño
+            this.index = 0;
         });
 
         this.schedule(delay);

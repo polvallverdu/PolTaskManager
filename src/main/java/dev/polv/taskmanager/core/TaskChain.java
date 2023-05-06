@@ -27,7 +27,7 @@ public class TaskChain {
 
     private Context context;
     private final Lock tickLock = new ReentrantLock();
-    private final Lock awaitLock = new ReentrantLock();
+    private boolean awaiting = false;
 
     private TaskChain() {
         this(new ArrayList<>());
@@ -130,10 +130,11 @@ public class TaskChain {
                 FunctionElement functionElement = (FunctionElement) element;
                 next = false;
 
-                if (!functionElement.isRunning() && awaitLock.tryLock()) {
+                if (!functionElement.isRunning() && !this.awaiting) {
+                    awaiting = true;
                     manager.getExecutor().submit(() -> functionElement.accept(context));
-                } else if (!functionElement.isRunning()) {
-                    awaitLock.unlock();
+                } else if (!functionElement.isRunning() && this.awaiting) {
+                    awaiting = false;
                     next = true;
                 }
             }
@@ -221,6 +222,15 @@ public class TaskChain {
         return this;
     }
 
+    public TaskChain runAsyncAwait(Consumer<Context> function) {
+        if (this.blocked) {
+            throw new IllegalStateException("TaskChain is blocked");
+        }
+
+        elements.add(new FunctionElement(function, true, true));
+        return this;
+    }
+
     public void start() {
         this._start();
     }
@@ -234,7 +244,11 @@ public class TaskChain {
     }
 
     public void repeat(Duration delay, Duration interval) {
-        this.run((ctx) -> this._schedule(interval));
+        this.timeout(interval);
+        this.run(ctx -> {
+            this.index = -1; // Apaño
+        });
+
         this.schedule(delay);
     }
 }

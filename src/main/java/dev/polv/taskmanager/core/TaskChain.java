@@ -296,7 +296,7 @@ public class TaskChain {
     public void repeat(Duration delay, Duration interval) {
         this.timeout(interval);
         this.run(ctx -> {
-            this.index = 0;
+            this.index = -1; // Apaño. Luego de correr una función, suma 1 al index, por lo tanto nunca volverá a la primera task si ahora no se mete a -1.
         });
 
         this.schedule(delay);
